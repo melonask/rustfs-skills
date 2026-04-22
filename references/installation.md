@@ -23,8 +23,6 @@ docker run -d \
 
 ## 2. Docker Compose
 
-If the user wants observability (Grafana, Prometheus, Jaeger, Otel), RustFS provides a `--profile observability` option. To fix permissions automatically via compose:
-
 ```yaml
 services:
   rustfs_perms:

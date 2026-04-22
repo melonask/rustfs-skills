@@ -38,8 +38,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .load()
         .await;
 
-    // 5. Initialize the client
-    let rustfs_client = Client::new(&sdk_config);
+    // 5. Initialize the client with PATH STYLE addressing enforced
+    let s3_config = aws_sdk_s3::config::Builder::from(&sdk_config)
+        .force_path_style(true)
+        .build();
+    let rustfs_client = Client::from_conf(s3_config);
 
     // --- Example: Create a Bucket ---
     rustfs_client

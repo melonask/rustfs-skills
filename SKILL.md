@@ -32,5 +32,5 @@ This skill contains detailed reference materials. Read the appropriate file base
 
 - **Ports**: API defaults to `9000`. Web Console defaults to `9001`.
 - **Decentralized**: RustFS has no master or metadata nodes. It uses a peer-to-peer architecture.
-- **Client**: You can use standard AWS S3 SDKs, or the MinIO client (`mc`) mapped to RustFS: `mc alias set rustfs http://<IP>:9000 <ACCESS_KEY> <SECRET_KEY>`
+- **Client**: You can use standard AWS S3 SDKs, or the official RustFS CLI (`rc`) mapped to RustFS: `rc alias set rustfs http://<IP>:9000 <ACCESS_KEY> <SECRET_KEY>`
 - **Default Credentials**: Default username/password is often `rustfsadmin` / `rustfsadmin` if not overridden via `RUSTFS_ACCESS_KEY` and `RUSTFS_SECRET_KEY`.
