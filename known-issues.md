@@ -280,6 +280,64 @@ No code changes needed; the skill already enforces `s3v4`. A minor clarifying co
 
 ---
 
+## Issue 8: S3 Presigned PUT Does Not Support `content-length-range`
+
+### File
+
+`references/sdks.md` (needs new section)
+
+### Problem
+
+The reeve specification (Section 5.2.4) mentions `POST /v1/upload/sign` generates a
+**Presigned PUT URL** with a `content-length-range` condition to enforce min/max
+file sizes before the upload hits disk.
+
+However, **AWS S3 and RustFS/MinIO do not support `content-length-range` in
+standard Presigned PUT URLs**. A Presigned PUT is just a signed URL with a verb
+—there's no way to attach policy conditions to it.
+
+To enforce file size limits on upload, you **must** use a **Presigned POST** with
+a Base64-encoded Policy Document.
+
+### Real-world reproduction
+
+```rust
+// WRONG: .presigned() on put_object() cannot enforce content-length-range
+let presigned = rustfs_client
+    .put_object()
+    .bucket("my-bucket")
+    .key("upload.txt")
+    .presigned()
+    .await?;
+```
+
+### Fix applied
+
+Added a **Presigned POST** example to `references/sdks.md` demonstrating the
+correct approach using `aws_sdk_s3::presigning::PresignedPost`:
+
+```rust
+use aws_sdk_s3::presigning::custom::Condition;
+
+let presigned_post = rustfs_client
+    .put_object()
+    .bucket("my-bucket")
+    .key("upload.txt")
+    .presigned_post()
+    .conditions(vec![
+        Condition::content_length_range(1, 25_000_000), // 1 B to 25 MB
+        Condition::starts_with("Content-Type", "image/"),
+    ])
+    .expires_in(std::time::Duration::from_secs(3600))
+    .await?;
+```
+
+This generates both a POST URL and the required form fields (`X-Amz-Signature`,
+`Policy`, etc.) that the client can use in a browser-based or programmatic
+upload.
+
+---
+
 ## Not an issue — Migration Guide already uses `rc` correctly
 
 ### File

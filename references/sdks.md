@@ -64,6 +64,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     println!("Object uploaded successfully");
 
+    // --- Example: Generate a Presigned POST URL (for browser uploads with size enforcement) ---
+    use aws_sdk_s3::presigning::custom::Condition;
+
+    let presigned_post = rustfs_client
+        .put_object()
+        .bucket("rust-sdk-demo")
+        .key("upload.txt")
+        .presigned_post()
+        .conditions(vec![
+            Condition::content_length_range(1, 25_000_000), // 1 B to 25 MB
+            Condition::starts_with("Content-Type", "image/"),
+        ])
+        .expires_in(std::time::Duration::from_secs(3600))
+        .await?;
+
+    println!("POST URL: {}", presigned_post.url());
+    // The form fields (Policy, Signature, etc.) are embedded in the POST URL;
+    // for browser use, extract them via presigned_post.extract_fields() or
+    // pass the fully-constructed URL directly to an HTML form with method="POST"
+    // and enctype="multipart/form-data".
+
     Ok(())
 }
 ```
