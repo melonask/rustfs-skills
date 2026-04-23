@@ -79,7 +79,7 @@ s3 = boto3.client(
     endpoint_url='http://127.0.0.1:9000',
     aws_access_key_id='rustfsadmin',
     aws_secret_access_key='rustfsadmin',
-    config=Config(signature_version='s3v4'),
+    config=Config(signature_version='s3v4'),  # s3v4 is required for presigned URLs to work with RustFS
     region_name='us-east-1' # Required by boto3, ignored by RustFS
 )
 
@@ -154,10 +154,14 @@ func main() {
 ```java
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 S3Client s3 = S3Client.builder()
     .endpointOverride(URI.create("http://127.0.0.1:9000"))
@@ -167,4 +171,14 @@ S3Client s3 = S3Client.builder()
     .build();
 
 s3.createBucket(CreateBucketRequest.builder().bucket("my-bucket").build());
+
+// Upload
+s3.putObject(
+    PutObjectRequest.builder().bucket("my-bucket").key("hello.txt").build(),
+    RequestBody.fromString("Hello from Java"));
+
+// Download
+byte[] data = s3.getObject(GetObjectRequest.builder().bucket("my-bucket").key("hello.txt").build())
+    .readAllBytes();
+String content = new String(data, StandardCharsets.UTF_8);
 ```

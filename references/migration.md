@@ -28,7 +28,7 @@ All migrations below achieve **true zero downtime** thanks to versioning + initi
 
 ```bash
 # 1. Direct binary (recommended)
-# Go to: https://github.com/rustfs/cli/releases/tag/v0.1.11
+# Go to: https://github.com/rustfs/cli/releases/tag/v0.1.12
 # Download the correct binary for your OS/architecture
 
 # 2. Homebrew (macOS / Linux)
@@ -38,14 +38,14 @@ brew install rustfs/tap/rc
 cargo install rustfs-cli
 
 # 4. Docker
-docker run --rm rustfs/rc:v0.1.11 --help
+docker run --rm rustfs/rc:v0.1.12 --help
 ```
 
 **Verify**:
 
 ```bash
 rc --version
-# → rc version 0.1.11
+# → rc 0.1.12
 ```
 
 ---
@@ -112,17 +112,17 @@ rc --version
    ```bash
    rc alias set aws https://s3.amazonaws.com AWS_ACCESS_KEY AWS_SECRET_KEY
 
-   rc replicate add rustfs/my-bucket \
-     --remote-bucket aws/target-bucket \
-     --priority 1 \
-     --replicate delete,delete-marker,existing-objects
-   ```
+    rc bucket replication add rustfs/my-bucket \
+      --remote-bucket aws/target-bucket \
+      --priority 1 \
+      --replicate delete,delete-marker,existing-objects
+    ```
 
 4. **Monitor replication**
 
    ```bash
-   rc replicate status rustfs/my-bucket
-   ```
+    rc bucket replication status rustfs/my-bucket
+    ```
 
 5. **Cutover & Verification**
    - Point applications to AWS S3.
@@ -146,18 +146,18 @@ rc --version
 2. **Enable versioning on both**
 
    ```bash
-   rc version enable source/my-bucket
-   rc version enable target/dest-bucket
+    rc bucket version enable source/my-bucket
+    rc bucket version enable target/dest-bucket
    ```
 
 3. **Native replication**
 
    ```bash
-   rc replicate add source/my-bucket \
-     --remote-bucket target/dest-bucket \
-     --priority 1 \
-     --replicate delete,delete-marker,existing-objects
-   ```
+    rc bucket replication add source/my-bucket \
+      --remote-bucket target/dest-bucket \
+      --priority 1 \
+      --replicate delete,delete-marker,existing-objects
+    ```
 
 4. **Initial seed of existing objects**
 
@@ -168,11 +168,11 @@ rc --version
 5. **Active-Active Cutover**
    - Both clusters accept writes during transition.
    - Update application endpoints / DNS / service mesh.
-   - Monitor: `rc replicate status source/my-bucket`
-   - Once traffic is fully migrated and lag = 0, remove rule:
-     ```bash
-     rc replicate remove source/my-bucket --id <rule-id>
-     ```
+    - Monitor: `rc bucket replication status source/my-bucket`
+    - Once traffic is fully migrated and lag = 0, remove rule:
+      ```bash
+      rc bucket replication remove source/my-bucket --id <rule-id>
+      ```
 
 6. **Final verification**
    ```bash
@@ -184,7 +184,7 @@ rc --version
 ## Best Practices & Troubleshooting
 
 - Always use `--checksum` with rclone.
-- Monitor replication lag via `rc replicate status`.
+- Monitor replication lag via `rc bucket replication status`.
 - Keep source storage online until 48 hours of stable production traffic on destination.
 - Test the entire procedure on a non-production bucket first.
 - rclone installation: `curl https://rclone.org/install.sh | sudo bash`
